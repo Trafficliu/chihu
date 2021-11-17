@@ -1,0 +1,13 @@
+/.gradle/
+.project
+.settings/
+.classpath
+bin/
+build/
+.DS_Store
+server/.gradle/
+server_lib/.gradle/
+server/*java_pid*.hprof
+server_lib/*java_pid*.hprof
+/.metadata/
+/.idea/
