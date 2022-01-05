@@ -37,12 +37,12 @@ public class UserRegistrationTest {
     }
 
     @After
-    public void cleanup() throws Exception{
+    public void cleanup() throws Exception {
         client.close();
     }
 
     @Test
-    public void registerUser_succeed() throws Exception{
+    public void registerUser_succeed() throws Exception {
         String username = String.format(
                 "TestUser-%s-%s", name.getMethodName(), UUID.randomUUID().toString().substring(0, 10));
         String email = username + "@chihu.com";

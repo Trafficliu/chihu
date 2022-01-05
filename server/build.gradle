@@ -12,74 +12,80 @@ buildscript {
 }
 
 plugins {
-	id 'java'
-	id 'java-library'
+    id 'java'
+    id 'java-library'
 //	id 'eclipse'
-	id 'idea'
-	id 'org.springframework.boot' version '2.5.1'
-	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'idea'
+    id 'org.springframework.boot' version '2.5.1'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 }
+
+//gradle.projectsEvaluated {
+//    tasks.withType(JavaCompile){
+//        options.compilerArgs << "-Xlint:deprecation"
+//    }
+//}
 
 group = 'com.chihu'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '11'
 
 sourceSets {
-	main.java.srcDir "src/main"
-	test.java.srcDir "src/test"
+    main.java.srcDir "src/main"
+    test.java.srcDir "src/test"
 }
 
 test {
-	useJUnitPlatform()
+    useJUnitPlatform()
 }
 
 void setMysqlProperties() {
-	if (project.hasProperty('mysql-address')) {
-		def mysqlHost = project.getProperty('mysql-address')
-		// mysql host
-		def url = 'jdbc:mysql://' + mysqlHost + '/chihu_db?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull&serverTimezone='
-		System.setProperty('spring.datasource.url', url)
-	}
-	if (project.hasProperty('mysql-username')) {
-		System.setProperty('spring.datasource.username', project.getProperty('mysql-username'))
-	}
-	if (project.hasProperty('mysql-password')) {
-		System.setProperty('spring.datasource.password', project.getProperty('mysql-password'))
-	}
+    if (project.hasProperty('mysql-address')) {
+        def mysqlHost = project.getProperty('mysql-address')
+        // mysql host
+        def url = 'jdbc:mysql://' + mysqlHost + '/chihu_db?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull&serverTimezone='
+        System.setProperty('spring.datasource.url', url)
+    }
+    if (project.hasProperty('mysql-username')) {
+        System.setProperty('spring.datasource.username', project.getProperty('mysql-username'))
+    }
+    if (project.hasProperty('mysql-password')) {
+        System.setProperty('spring.datasource.password', project.getProperty('mysql-password'))
+    }
 }
 
 bootRun {
-	setMysqlProperties()
-	systemProperties = System.properties
+    setMysqlProperties()
+    systemProperties = System.properties
 }
 
 sourceSets {
-	integrationTest {
-		java {
-			compileClasspath += main.output + test.output
-			runtimeClasspath += main.output + test.output
-			srcDir file('src/integration-test/java')
-		}
-		resources.srcDir file('src/integration-test/resources')
-	}
+    integrationTest {
+        java {
+            compileClasspath += main.output + test.output
+            runtimeClasspath += main.output + test.output
+            srcDir file('src/integration-test/java')
+        }
+        resources.srcDir file('src/integration-test/resources')
+    }
 }
 
 configurations {
-	integrationImplementation.extendsFrom testImplementation
-	integrationTestCompile.extendsFrom testCompile
-	integrationTestRuntime.extendsFrom testRuntime
-	integrationImplementation.extendsFrom implementation
-	integrationTestCompile.extendsFrom compile
-	integrationTestRuntime.extendsFrom runtime
-	compile.exclude module: 'spring-boot-starter-logging'
-	compile.exclude module: 'slf4j-log4j12'
+    integrationImplementation.extendsFrom testImplementation
+    integrationTestCompile.extendsFrom testCompile
+    integrationTestRuntime.extendsFrom testRuntime
+    integrationImplementation.extendsFrom implementation
+    integrationTestCompile.extendsFrom compile
+    integrationTestRuntime.extendsFrom runtime
+    compile.exclude module: 'spring-boot-starter-logging'
+    compile.exclude module: 'slf4j-log4j12'
 }
 
 task integrationTest(type: Test) {
-	testClassesDirs = sourceSets.integrationTest.output.classesDirs
-	classpath = sourceSets.integrationTest.runtimeClasspath
-	outputs.upToDateWhen { false }
-	mustRunAfter test
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
+    outputs.upToDateWhen { false }
+    mustRunAfter test
 //	testLogging {
 //		showStandardStreams = true
 //		events "passed", "skipped", "failed"
@@ -91,19 +97,19 @@ task integrationTest(type: Test) {
 }
 
 dependencies {
-	implementation project(':server_lib')
-	testImplementation project(':server_lib')
-	integrationTestImplementation project(':server_lib')
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	runtimeOnly 'mysql:mysql-connector-java'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	integrationTestImplementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation project(':server_lib')
+    testImplementation project(':server_lib')
+    integrationTestImplementation project(':server_lib')
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    runtimeOnly 'mysql:mysql-connector-java'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    integrationTestImplementation 'org.springframework.boot:spring-boot-starter-test'
 
-	compile 'log4j:log4j:1.2.17'
-	testCompile 'junit:junit:4.13.2'
-	integrationTestCompile 'junit:junit:4.13.2'
-	integrationTestCompile 'org.assertj:assertj-core:3.0.0'
+    compile 'log4j:log4j:1.2.17'
+    testCompile 'junit:junit:4.13.2'
+    integrationTestCompile 'junit:junit:4.13.2'
+    integrationTestCompile 'org.assertj:assertj-core:3.0.0'
 
     // lombok
     compileOnly("org.projectlombok:lombok:${lombokVersion}")
@@ -113,86 +119,86 @@ dependencies {
     integrationTestCompileOnly("org.projectlombok:lombok:${lombokVersion}")
     integrationTestAnnotationProcessor("org.projectlombok:lombok:${lombokVersion}")
 
-	api 'org.apache.commons:commons-math3:3.6.1'
-	implementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
-	integrationTestImplementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
+    api 'org.apache.commons:commons-math3:3.6.1'
+    implementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
+    integrationTestImplementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
 
-	implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.7'
+    implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.7'
 
-	// Apache lucene
-	implementation group: 'org.apache.lucene', name: 'lucene-core', version: '8.6.3'
-	integrationTestImplementation group: 'org.apache.lucene', name: 'lucene-core', version: '8.6.3'
+    // Apache lucene
+    implementation group: 'org.apache.lucene', name: 'lucene-core', version: '8.6.3'
+    integrationTestImplementation group: 'org.apache.lucene', name: 'lucene-core', version: '8.6.3'
 
-	implementation group: 'com.google.guava', name: 'guava', version: '29.0-jre'
-	integrationTestImplementation group: 'com.google.guava', name: 'guava', version: '29.0-jre'
+    implementation group: 'com.google.guava', name: 'guava', version: '29.0-jre'
+    integrationTestImplementation group: 'com.google.guava', name: 'guava', version: '29.0-jre'
 
-	implementation group: 'joda-time', name: 'joda-time', version: '2.10.6'
-	implementation group: 'javax.persistence', name: 'javax.persistence-api', version: '2.2'
-	implementation group: 'javax.annotation', name: 'javax.annotation-api', version: '1.3.2'
-	implementation "org.springframework.boot:spring-boot-starter-security"
-	implementation group: 'org.springframework.security.oauth', name: 'spring-security-oauth2', version: '2.5.0.RELEASE'
-	implementation group: 'org.springframework.security', name: 'spring-security-jwt', version: '1.1.1.RELEASE'
-	implementation group: 'org.springframework.security', name: 'spring-security-config', version: '5.3.5.RELEASE'
-	implementation group: 'org.springframework.security', name: 'spring-security-web', version: '5.3.5.RELEASE'
+    implementation group: 'joda-time', name: 'joda-time', version: '2.10.6'
+    implementation group: 'javax.persistence', name: 'javax.persistence-api', version: '2.2'
+    implementation group: 'javax.annotation', name: 'javax.annotation-api', version: '1.3.2'
+    implementation "org.springframework.boot:spring-boot-starter-security"
+    implementation group: 'org.springframework.security.oauth', name: 'spring-security-oauth2', version: '2.5.0.RELEASE'
+    implementation group: 'org.springframework.security', name: 'spring-security-jwt', version: '1.1.1.RELEASE'
+    implementation group: 'org.springframework.security', name: 'spring-security-config', version: '5.3.5.RELEASE'
+    implementation group: 'org.springframework.security', name: 'spring-security-web', version: '5.3.5.RELEASE'
 
-	implementation group: 'org.hibernate', name: 'hibernate-entitymanager', version: '5.4.22.Final'
-	implementation group: 'mysql', name: 'mysql-connector-java', version: '8.0.21'
-	implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
+    implementation group: 'org.hibernate', name: 'hibernate-entitymanager', version: '5.4.22.Final'
+    implementation group: 'mysql', name: 'mysql-connector-java', version: '8.0.21'
+    implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
 
-	// TODO: Why do I need to add these dependencies again? Why are they not automatically included?
-	//       integrationTestImplementation doesn't seem to be getting dependency from testImplementation.
-	integrationTestImplementation group: 'joda-time', name: 'joda-time', version: '2.10.6'
-	integrationTestImplementation group: 'javax.persistence', name: 'javax.persistence-api', version: '2.2'
-	integrationTestImplementation group: 'javax.annotation', name: 'javax.annotation-api', version: '1.3.2'
-	integrationTestImplementation "org.springframework.boot:spring-boot-starter-security"
-	integrationTestImplementation group: 'org.springframework.security.oauth', name: 'spring-security-oauth2', version: '2.5.0.RELEASE'
-	integrationTestImplementation group: 'org.springframework.security', name: 'spring-security-jwt', version: '1.1.1.RELEASE'
-	integrationTestImplementation group: 'org.springframework.security', name: 'spring-security-config', version: '5.3.5.RELEASE'
-	integrationTestImplementation group: 'org.springframework.security', name: 'spring-security-web', version: '5.3.5.RELEASE'
+    // TODO: Why do I need to add these dependencies again? Why are they not automatically included?
+    //       integrationTestImplementation doesn't seem to be getting dependency from testImplementation.
+    integrationTestImplementation group: 'joda-time', name: 'joda-time', version: '2.10.6'
+    integrationTestImplementation group: 'javax.persistence', name: 'javax.persistence-api', version: '2.2'
+    integrationTestImplementation group: 'javax.annotation', name: 'javax.annotation-api', version: '1.3.2'
+    integrationTestImplementation "org.springframework.boot:spring-boot-starter-security"
+    integrationTestImplementation group: 'org.springframework.security.oauth', name: 'spring-security-oauth2', version: '2.5.0.RELEASE'
+    integrationTestImplementation group: 'org.springframework.security', name: 'spring-security-jwt', version: '1.1.1.RELEASE'
+    integrationTestImplementation group: 'org.springframework.security', name: 'spring-security-config', version: '5.3.5.RELEASE'
+    integrationTestImplementation group: 'org.springframework.security', name: 'spring-security-web', version: '5.3.5.RELEASE'
 
-	integrationTestImplementation group: 'org.hibernate', name: 'hibernate-entitymanager', version: '5.4.22.Final'
-	integrationTestImplementation group: 'mysql', name: 'mysql-connector-java', version: '8.0.21'
-	integrationTestImplementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
+    integrationTestImplementation group: 'org.hibernate', name: 'hibernate-entitymanager', version: '5.4.22.Final'
+    integrationTestImplementation group: 'mysql', name: 'mysql-connector-java', version: '8.0.21'
+    integrationTestImplementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
 
-	// http
-	implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.13'
-	implementation group: 'org.apache.httpcomponents', name: 'httpmime', version: '4.5.13'
+    // http
+    implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.13'
+    implementation group: 'org.apache.httpcomponents', name: 'httpmime', version: '4.5.13'
 
-	integrationTestImplementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.13'
-	integrationTestImplementation group: 'org.apache.httpcomponents', name: 'httpmime', version: '4.5.13'
+    integrationTestImplementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.13'
+    integrationTestImplementation group: 'org.apache.httpcomponents', name: 'httpmime', version: '4.5.13'
 
-	// JUnit test framework
-	testImplementation group: 'junit', name: 'junit', version: '4.13.2'
-	testImplementation group: 'com.google.guava', name: 'guava-testlib', version: '28.1-jre'
-	testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.8.0'
-	testImplementation group: 'org.junit.platform', name: 'junit-platform-engine', version: '1.8.0'
-	testImplementation group: 'org.junit.platform', name: 'junit-platform-commons', version: '1.8.0'
-	testImplementation group: 'com.jayway.jsonpath', name: 'json-path', version: '2.4.0'
-	testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.5.4'
+    // JUnit test framework
+    testImplementation group: 'junit', name: 'junit', version: '4.13.2'
+    testImplementation group: 'com.google.guava', name: 'guava-testlib', version: '28.1-jre'
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.8.0'
+    testImplementation group: 'org.junit.platform', name: 'junit-platform-engine', version: '1.8.0'
+    testImplementation group: 'org.junit.platform', name: 'junit-platform-commons', version: '1.8.0'
+    testImplementation group: 'com.jayway.jsonpath', name: 'json-path', version: '2.4.0'
+    testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.5.4'
 
-	integrationTestImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.5.4'
+    integrationTestImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.5.4'
 
-	testImplementation('org.junit.jupiter:junit-jupiter-api:5.8.0')
-	integrationTestImplementation('org.junit.jupiter:junit-jupiter-api:5.8.0')
+    testImplementation('org.junit.jupiter:junit-jupiter-api:5.8.0')
+    integrationTestImplementation('org.junit.jupiter:junit-jupiter-api:5.8.0')
 
-	integrationTestImplementation group: 'junit', name: 'junit', version: '4.13.2'
+    integrationTestImplementation group: 'junit', name: 'junit', version: '4.13.2'
 
-	testRuntime('org.junit.jupiter:junit-jupiter-engine:5.8.0')
-	integrationTestRuntime('org.junit.jupiter:junit-jupiter-engine:5.8.0')
+    testRuntime('org.junit.jupiter:junit-jupiter-engine:5.8.0')
+    integrationTestRuntime('org.junit.jupiter:junit-jupiter-engine:5.8.0')
 
-	// test logging
-	implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.13.3'
-	implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.13.3'
+    // test logging
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.13.3'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.13.3'
 //	implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.13.3'
-	implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
 
-	testImplementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.13.3'
-	testRuntime group: 'ch.qos.logback', name: 'logback-classic', version: '1.+'
+    testImplementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.13.3'
+    testRuntime group: 'ch.qos.logback', name: 'logback-classic', version: '1.+'
 
 }
 
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
 check.dependsOn integrationTest
