@@ -12,7 +12,9 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Service;
 
+import java.sql.Date;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -89,7 +91,7 @@ public class BusinessEntityDaoImpl implements BusinessEntityDao {
     public void deleteBusinessEntity(@NonNull Long businessEntityId) {
         String sql =
             "DELETE FROM business_entities " +
-                "      WHERE business_entity_id = :business_entity_id";
+            "      WHERE business_entity_id = :business_entity_id";
         SqlParameterSource parameterSource = new MapSqlParameterSource()
             .addValue("business_entity_id", businessEntityId);
         namedParameterJdbcTemplate.update(sql, parameterSource);
@@ -99,9 +101,9 @@ public class BusinessEntityDaoImpl implements BusinessEntityDao {
     public Optional<BusinessEntity> getBusinessEntityById(@NonNull Long businessEntityId) {
         String sql =
             "SELECT * " +
-                "  FROM business_entities " +
-                " WHERE business_entity_id = :business_entity_id" +
-                " LIMIT 1";
+            "  FROM business_entities " +
+            " WHERE business_entity_id = :business_entity_id" +
+            " LIMIT 1";
         SqlParameterSource parameterSource = new MapSqlParameterSource()
             .addValue("business_entity_id", businessEntityId);
 
@@ -120,9 +122,9 @@ public class BusinessEntityDaoImpl implements BusinessEntityDao {
     public Optional<BusinessEntity> getBusinessEntityByName(@NonNull String businessEntityName) {
         String sql =
             "SELECT * " +
-                "  FROM business_entities " +
-                " WHERE business_entity_name = :business_entity_name" +
-                " LIMIT 1";
+            "  FROM business_entities " +
+            " WHERE business_entity_name = :business_entity_name" +
+            " LIMIT 1";
         SqlParameterSource parameterSource = new MapSqlParameterSource()
             .addValue("business_entity_name", businessEntityName);
         List<BusinessEntity> result =
@@ -136,5 +138,56 @@ public class BusinessEntityDaoImpl implements BusinessEntityDao {
         return Optional.of(result.iterator().next());
     }
 
+    // TODO: Business Entity should either have a Working Date,
+    //       or Working Days. But not both.
+    // Working date are used for pop-ups, set in to represent the date for pop-up
+    @Override
+    public void setWorkingDate(
+        @NonNull Long businessEntityId, @NonNull LocalDate date) {
+        String sql =
+            "UPDATE business_entities " +
+            "   SET working_date = :working_date, " +
+            "       repeated = :repeated, " +
+            "       working_days = 0 " +
+            " WHERE business_entity_id = :business_entity_id";
+        log.info("SQL query is set to be: {}", sql);
+        SqlParameterSource parameterSource = new MapSqlParameterSource()
+            .addValue("business_entity_id", businessEntityId)
+            .addValue("working_date", Date.valueOf(date))
+            .addValue("repeated", false);
+        namedParameterJdbcTemplate.update(sql, parameterSource);
+    }
+
+    // Working days are set in bits representing if business opens on Monday ... Sunday
+    @Override
+    public void setWorkingDays(
+        @NonNull Long businessEntityId,@NonNull Integer workingDaysBits) {
+        String sql =
+            "UPDATE business_entities " +
+            "   SET working_days = :working_days, " +
+            "       repeated = :repeated, " +
+            "       working_date = NULL " +
+            " WHERE business_entity_id = :business_entity_id";
+        SqlParameterSource parameterSource = new MapSqlParameterSource()
+            .addValue("business_entity_id", businessEntityId)
+            .addValue("working_days", workingDaysBits)
+            .addValue("repeated", true);
+        namedParameterJdbcTemplate.update(sql, parameterSource);
+    }
+
+    // Working hours are set in bits, each bit stands for a 30 minutes block
+    // representing if business opens on that 30-minute block
+    @Override
+    public void setWorkingHours(
+        @NonNull Long businessEntityId,@NonNull Long workingHoursBits) {
+        String sql =
+            "UPDATE business_entities " +
+            "   SET working_hours = :working_hours" +
+            " WHERE business_entity_id = :business_entity_id";
+        SqlParameterSource parameterSource = new MapSqlParameterSource()
+            .addValue("business_entity_id", businessEntityId)
+            .addValue("working_hours", workingHoursBits);
+        namedParameterJdbcTemplate.update(sql, parameterSource);
+    }
 
 }

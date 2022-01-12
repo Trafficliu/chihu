@@ -18,6 +18,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.Optional;
 
 @Slf4j
@@ -32,6 +36,8 @@ public class BusinessController {
 
     @Autowired
     private BusinessEntityDao businessEntityDao;
+
+    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     /**
      *  Business Group Operations
@@ -188,15 +194,17 @@ public class BusinessController {
     @GetMapping("/business/get_business_entity_by_id")
     public BusinessEntity getBusinessEntityById(
         Authentication authentication,
-        @RequestParam(value = "business_entity_id", required = true) Long business_entity_id)
+        @RequestParam(value = "business_entity_id", required = true) Long businessEntityId)
         throws IllegalArgumentException {
 
         Optional<BusinessEntity> businessEntity =
-            businessEntityDao.getBusinessEntityById(business_entity_id);
+            businessEntityDao.getBusinessEntityById(businessEntityId);
         if (businessEntity.isEmpty()) {
             throw new IllegalArgumentException(
                 "Couldn't find a valid business entity with the provided ID");
         }
+        log.info("Got business entity:{}, business entity id is {}, isOneTime is set to: {}",
+            businessEntity.get(), businessEntityId,businessEntity.get().isRepeated());
 
         return businessEntity.get();
     }
@@ -204,11 +212,11 @@ public class BusinessController {
     @GetMapping("/business/get_business_entity_by_name")
     public BusinessEntity getBusinessEntityByName(
         Authentication authentication,
-        @RequestParam(value = "business_entity_name", required = true) String business_entity_name)
+        @RequestParam(value = "business_entity_name", required = true) String businessEntityName)
         throws IllegalArgumentException {
 
         Optional<BusinessEntity> businessEntity =
-            businessEntityDao.getBusinessEntityByName(business_entity_name);
+            businessEntityDao.getBusinessEntityByName(businessEntityName);
         if (businessEntity.isEmpty()) {
             throw new IllegalArgumentException(
                 "Couldn't find a valid business entity with the provided name");
@@ -216,6 +224,82 @@ public class BusinessController {
 
         return businessEntity.get();
     }
+
+    @PostMapping("/business/set_working_date")
+    public void setWorkingDate(
+        Authentication authentication,
+        @RequestParam(value = "business_entity_id", required = true) Long businessEntityId,
+        @RequestParam(value = "working_date_str", required = true) String workingDateStr)
+    throws IllegalArgumentException, AccessDeniedException {
+
+        ChihuUserDetails userDetails =
+            (ChihuUserDetails)authentication.getPrincipal();
+        Long userId = userDetails.getUserId();
+        if (!userIsBusinessEntityOwner(userId, businessEntityId)) {
+            throw new AccessDeniedException(
+                "The user is not the owner of the business.");
+        }
+        LocalDate date = LocalDate.parse(workingDateStr, formatter);
+
+        log.info(
+            "Trying to set the working date to be {} for business entity: {}",
+            date, businessEntityId);
+        businessEntityDao.setWorkingDate(businessEntityId, date);
+    }
+
+    @PostMapping("/business/set_working_days")
+    public void setWorkingDays(
+        Authentication authentication,
+        @RequestParam(value = "business_entity_id", required = true) Long businessEntityId,
+        @RequestParam(value = "working_days", required = true) Integer workingDays)
+        throws IllegalArgumentException, AccessDeniedException {
+
+        ChihuUserDetails userDetails =
+            (ChihuUserDetails)authentication.getPrincipal();
+        Long userId = userDetails.getUserId();
+        if (!userIsBusinessEntityOwner(userId, businessEntityId)) {
+            throw new AccessDeniedException(
+                "The user is not the owner of the business.");
+        }
+
+        businessEntityDao.setWorkingDays(businessEntityId, workingDays);
+    }
+
+    @PostMapping("/business/set_working_hours")
+    public void setWorkingHours(
+        Authentication authentication,
+        @RequestParam(value = "business_entity_id", required = true) Long businessEntityId,
+        @RequestParam(value = "working_hours", required = true) Long workingHours)
+        throws IllegalArgumentException, AccessDeniedException {
+
+        ChihuUserDetails userDetails =
+            (ChihuUserDetails)authentication.getPrincipal();
+        Long userId = userDetails.getUserId();
+        if (!userIsBusinessEntityOwner(userId, businessEntityId)) {
+            throw new AccessDeniedException(
+                "The user is not the owner of the business.");
+        }
+
+        businessEntityDao.setWorkingHours(businessEntityId, workingHours);
+    }
+
+//    @PostMapping("/business/is_open")
+//    public void isOpenForDate(
+//        Authentication authentication,
+//        @RequestParam(value = "business_entity_id", required = true) Long businessEntityId,
+//        @RequestParam(value = "working_days", required = true) Integer workingDays)
+//        throws IllegalArgumentException, AccessDeniedException {
+//
+//        ChihuUserDetails userDetails =
+//            (ChihuUserDetails)authentication.getPrincipal();
+//        Long userId = userDetails.getUserId();
+//        if (!userIsBusinessEntityOwner(userId, businessEntityId)) {
+//            throw new AccessDeniedException(
+//                "The user is not the owner of the business.");
+//        }
+//
+//        businessEntityDao.setWorkingDays(businessEntityId, workingDays);
+//    }
 
     // Helper Functions
     private boolean userIsBusinessGroupOwner(Long userId, Long businessGroupId) {

@@ -3,7 +3,7 @@ package com.chihu.server.model;
 import lombok.*;
 
 import javax.persistence.*;
-import java.util.Date;
+import java.sql.Date;
 
 @Entity
 @Table(name = "business_entities")
@@ -37,6 +37,9 @@ public class BusinessEntity {
     @Column(name = "phone_number")
     private String phoneNumber;
 
+    @Column(name = "repeated")
+    private boolean repeated;
+
     @Column(name = "working_date")
     private Date workingDate;
 
@@ -67,5 +70,4 @@ public class BusinessEntity {
 
     @Column(name = "geo_code")
     private Long geoCode;
-
 }

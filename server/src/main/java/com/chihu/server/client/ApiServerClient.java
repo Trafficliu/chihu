@@ -173,7 +173,8 @@ public class ApiServerClient implements Closeable {
         parameters.add(new BasicNameValuePair("token", token));
         parameters.add(new BasicNameValuePair("username", username));
         parameters.add(new BasicNameValuePair("password", password));
-        parameters.add(new BasicNameValuePair("confirm_password", confirmPassword));
+        parameters.add(
+            new BasicNameValuePair("confirm_password", confirmPassword));
         post.setEntity(new UrlEncodedFormEntity(parameters));
 
         CloseableHttpResponse response = httpClient.execute(post);
@@ -234,8 +235,6 @@ public class ApiServerClient implements Closeable {
         parameters.add(
             new BasicNameValuePair(
                 "business_group_id", Long.toString(businessGroupId)));
-        post.setEntity(new UrlEncodedFormEntity(parameters));
-
         post.setEntity(new UrlEncodedFormEntity(parameters));
 
         CloseableHttpResponse response = httpClient.execute(post);
@@ -321,8 +320,6 @@ public class ApiServerClient implements Closeable {
                 "business_entity_id", Long.toString(businessEntityId)));
         post.setEntity(new UrlEncodedFormEntity(parameters));
 
-        post.setEntity(new UrlEncodedFormEntity(parameters));
-
         CloseableHttpResponse response = httpClient.execute(post);
         handleHttp(post, response);
     }
@@ -361,6 +358,59 @@ public class ApiServerClient implements Closeable {
             IOUtils.toString(
                 response.getEntity().getContent(),
                 StandardCharsets.UTF_8.displayName()));
+    }
+
+    public void setWorkingDate(Long businessEntityId, String workingDateStr)
+        throws Exception {
+        HttpPost post = new HttpPost();
+        post.setURI(generateUri("/business/set_working_date").build());
+
+        List<NameValuePair> parameters = Lists.newArrayList();
+        parameters.add(
+            new BasicNameValuePair(
+                "business_entity_id", Long.toString(businessEntityId)));
+        parameters.add(
+            new BasicNameValuePair("working_date_str", workingDateStr));
+        post.setEntity(new UrlEncodedFormEntity(parameters));
+
+        CloseableHttpResponse response = httpClient.execute(post);
+        handleHttp(post, response);
+    }
+
+    public void setWorkingDays(Long businessEntityId, Integer workingDays)
+        throws Exception {
+        HttpPost post = new HttpPost();
+        post.setURI(generateUri("/business/set_working_days").build());
+
+        List<NameValuePair> parameters = Lists.newArrayList();
+        parameters.add(
+            new BasicNameValuePair(
+                "business_entity_id", Long.toString(businessEntityId)));
+        parameters.add(
+            new BasicNameValuePair(
+                "working_days", Integer.toString(workingDays)));
+        post.setEntity(new UrlEncodedFormEntity(parameters));
+
+        CloseableHttpResponse response = httpClient.execute(post);
+        handleHttp(post, response);
+    }
+
+    public void setWorkingHours(Long businessEntityId, Long workingHours)
+        throws Exception {
+        HttpPost post = new HttpPost();
+        post.setURI(generateUri("/business/set_working_hours").build());
+
+        List<NameValuePair> parameters = Lists.newArrayList();
+        parameters.add(
+            new BasicNameValuePair(
+                "business_entity_id", Long.toString(businessEntityId)));
+        parameters.add(
+            new BasicNameValuePair(
+                "working_hours", Long.toString(workingHours)));
+        post.setEntity(new UrlEncodedFormEntity(parameters));
+
+        CloseableHttpResponse response = httpClient.execute(post);
+        handleHttp(post, response);
     }
 
     // Helper methods
