@@ -3,6 +3,7 @@ package com.chihu.server.client;
 import com.chihu.server.common.ApiServerConstants;
 import com.chihu.server.model.BusinessEntity;
 import com.chihu.server.model.BusinessGroup;
+import com.chihu.server.model.Dish;
 import com.chihu.server.model.User;
 import com.chihu.server.serializer.ApiServerSerializer;
 import com.google.common.base.Strings;
@@ -411,6 +412,93 @@ public class ApiServerClient implements Closeable {
 
         CloseableHttpResponse response = httpClient.execute(post);
         handleHttp(post, response);
+    }
+
+    // Dishes
+    public void createDish(Dish dish) throws Exception {
+        HttpPost post = new HttpPost();
+        post.setURI(generateUri("/dish/create_dish").build());
+
+        MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create();
+        entityBuilder.addPart(
+            "dish_str",
+            new StringBody(
+                ApiServerSerializer.serialize(dish),
+                ContentType.APPLICATION_JSON));
+        post.setEntity(entityBuilder.build());
+
+        CloseableHttpResponse response = httpClient.execute(post);
+        handleHttp(post, response);
+    }
+
+    public void updateDish(Dish dish) throws Exception {
+        HttpPost post = new HttpPost();
+        post.setURI(generateUri("/dish/update_dish").build());
+
+        MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create();
+        entityBuilder.addPart(
+            "dish_str",
+            new StringBody(
+                ApiServerSerializer.serialize(dish),
+                ContentType.APPLICATION_JSON));
+        post.setEntity(entityBuilder.build());
+
+        CloseableHttpResponse response = httpClient.execute(post);
+        handleHttp(post, response);
+    }
+
+    public void deleteDish(Long dishId) throws Exception {
+        HttpPost post = new HttpPost();
+        post.setURI(generateUri("/dish/delete_dish").build());
+
+        List<NameValuePair> parameters = Lists.newArrayList();
+        parameters.add(
+            new BasicNameValuePair(
+                "dish_id", Long.toString(dishId)));
+        post.setEntity(new UrlEncodedFormEntity(parameters));
+
+        CloseableHttpResponse response = httpClient.execute(post);
+        handleHttp(post, response);
+    }
+
+    public Dish getDishById(Long dishId) throws Exception {
+        HttpGet get = new HttpGet();
+        get.setURI(
+            generateUri("/dish/get_dish_by_id")
+                .addParameter(
+                    "dish_id",
+                    Long.toString(dishId))
+                .build());
+
+        CloseableHttpResponse response = httpClient.execute(get);
+        handleHttp(get, response);
+
+        return ApiServerSerializer.toDish(
+            IOUtils.toString(
+                response.getEntity().getContent(),
+                StandardCharsets.UTF_8.displayName()));
+    }
+
+    public Dish getDishByName(Long businessGroupId, String dishName)
+        throws Exception {
+        HttpGet get = new HttpGet();
+        get.setURI(
+            generateUri("/dish/get_dish_by_name")
+                .addParameter(
+                    "business_group_id",
+                    Long.toString(businessGroupId))
+                .addParameter(
+                    "dish_name",
+                    dishName)
+                .build());
+
+        CloseableHttpResponse response = httpClient.execute(get);
+        handleHttp(get, response);
+
+        return ApiServerSerializer.toDish(
+            IOUtils.toString(
+                response.getEntity().getContent(),
+                StandardCharsets.UTF_8.displayName()));
     }
 
     // Helper methods

@@ -8,6 +8,7 @@ import com.chihu.server.proxy.BusinessEntityDao;
 import com.chihu.server.proxy.BusinessGroupDao;
 import com.chihu.server.serializer.ApiServerSerializer;
 import com.chihu.server.service.UserService;
+import com.chihu.server.utils.OwnershipUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
@@ -36,6 +37,9 @@ public class BusinessController {
 
     @Autowired
     private BusinessEntityDao businessEntityDao;
+
+    @Autowired
+    private OwnershipUtil ownershipUtil;
 
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -73,7 +77,7 @@ public class BusinessController {
         ChihuUserDetails userDetails =
             (ChihuUserDetails)authentication.getPrincipal();
         Long userId = userDetails.getUserId();
-        if (!userIsBusinessGroupOwner(userId, businessGroupId)) {
+        if (!ownershipUtil.userIsBusinessGroupOwner(userId, businessGroupId)) {
             throw new AccessDeniedException(
                 "The user is not the owner of the business.");
         }
@@ -93,7 +97,7 @@ public class BusinessController {
         ChihuUserDetails userDetails =
             (ChihuUserDetails)authentication.getPrincipal();
         Long userId = userDetails.getUserId();
-        if (!userIsBusinessGroupOwner(userId, businessGroupId)) {
+        if (!ownershipUtil.userIsBusinessGroupOwner(userId, businessGroupId)) {
             throw new AccessDeniedException(
                 "The user is not the owner of the business.");
         }
@@ -164,7 +168,7 @@ public class BusinessController {
         ChihuUserDetails userDetails =
             (ChihuUserDetails)authentication.getPrincipal();
         Long userId = userDetails.getUserId();
-        if (!userIsBusinessEntityOwner(userId, businessEntityId)) {
+        if (!ownershipUtil.userIsBusinessEntityOwner(userId, businessEntityId)) {
             throw new AccessDeniedException(
                 "The user is not the owner of the business.");
         }
@@ -183,7 +187,7 @@ public class BusinessController {
         ChihuUserDetails userDetails =
             (ChihuUserDetails)authentication.getPrincipal();
         Long userId = userDetails.getUserId();
-        if (!userIsBusinessEntityOwner(userId, businessEntityId)) {
+        if (!ownershipUtil.userIsBusinessEntityOwner(userId, businessEntityId)) {
             throw new AccessDeniedException(
                 "The user is not the owner of the business.");
         }
@@ -235,7 +239,7 @@ public class BusinessController {
         ChihuUserDetails userDetails =
             (ChihuUserDetails)authentication.getPrincipal();
         Long userId = userDetails.getUserId();
-        if (!userIsBusinessEntityOwner(userId, businessEntityId)) {
+        if (!ownershipUtil.userIsBusinessEntityOwner(userId, businessEntityId)) {
             throw new AccessDeniedException(
                 "The user is not the owner of the business.");
         }
@@ -257,7 +261,7 @@ public class BusinessController {
         ChihuUserDetails userDetails =
             (ChihuUserDetails)authentication.getPrincipal();
         Long userId = userDetails.getUserId();
-        if (!userIsBusinessEntityOwner(userId, businessEntityId)) {
+        if (!ownershipUtil.userIsBusinessEntityOwner(userId, businessEntityId)) {
             throw new AccessDeniedException(
                 "The user is not the owner of the business.");
         }
@@ -275,7 +279,7 @@ public class BusinessController {
         ChihuUserDetails userDetails =
             (ChihuUserDetails)authentication.getPrincipal();
         Long userId = userDetails.getUserId();
-        if (!userIsBusinessEntityOwner(userId, businessEntityId)) {
+        if (!ownershipUtil.userIsBusinessEntityOwner(userId, businessEntityId)) {
             throw new AccessDeniedException(
                 "The user is not the owner of the business.");
         }
@@ -301,26 +305,4 @@ public class BusinessController {
 //        businessEntityDao.setWorkingDays(businessEntityId, workingDays);
 //    }
 
-    // Helper Functions
-    private boolean userIsBusinessGroupOwner(Long userId, Long businessGroupId) {
-        Optional<BusinessGroup> businessGroup =
-            businessGroupDao.getBusinessGroupById(businessGroupId);
-        if (businessGroup.isEmpty()) {
-            throw new IllegalArgumentException(
-                "Couldn't find a valid business group with the provided ID");
-        }
-        Long businessOwnerId = businessGroup.get().getOwnerId();
-        return businessOwnerId.equals(userId);
-    }
-
-    private boolean userIsBusinessEntityOwner(Long userId, Long businessEntityId) {
-        Optional<BusinessEntity> businessEntity =
-            businessEntityDao.getBusinessEntityById(businessEntityId);
-        if (businessEntity.isEmpty()) {
-            throw new IllegalArgumentException(
-                "Couldn't find a valid business entity with the provided ID");
-        }
-        Long businessOwnerId = businessEntity.get().getOwnerId();
-        return businessOwnerId.equals(userId);
-    }
 }

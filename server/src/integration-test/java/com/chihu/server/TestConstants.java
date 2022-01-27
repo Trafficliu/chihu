@@ -2,6 +2,7 @@ package com.chihu.server;
 
 import com.chihu.server.model.BusinessEntity;
 import com.chihu.server.model.BusinessGroup;
+import com.chihu.server.model.Dish;
 import com.chihu.server.model.User;
 
 import java.util.UUID;
@@ -45,5 +46,13 @@ public class TestConstants {
             .state("CA")
             .country("US")
             .zipCode("90005")
+            .build();
+
+    public static final Dish BASIC_TEST_DISH =
+        Dish.builder()
+            .dishName("TestDishName-" + UUID.randomUUID().toString().substring(0, 7))
+            .priceInCent(1500)
+            .cuisineIndex("C01010101")
+            .cuisineName("Sichuan")
             .build();
 }
