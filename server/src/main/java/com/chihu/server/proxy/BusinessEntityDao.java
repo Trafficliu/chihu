@@ -4,11 +4,11 @@ import com.chihu.server.model.BusinessEntity;
 import lombok.NonNull;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.Optional;
 
 public interface BusinessEntityDao {
-    void insertOrUpdateBusinessEntity(@NonNull BusinessEntity businessEntity);
+    void createBusinessEntity(@NonNull BusinessEntity businessEntity);
+    void updateBusinessEntity(@NonNull BusinessEntity businessEntity);
     void deleteBusinessEntity(@NonNull Long businessEntityId);
 
     Optional<BusinessEntity> getBusinessEntityById(@NonNull Long businessEntityId);

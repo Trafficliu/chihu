@@ -3,7 +3,6 @@ package com.chihu.server.controller;
 import com.chihu.server.model.BusinessEntity;
 import com.chihu.server.model.BusinessGroup;
 import com.chihu.server.model.ChihuUserDetails;
-import com.chihu.server.model.User;
 import com.chihu.server.proxy.BusinessEntityDao;
 import com.chihu.server.proxy.BusinessGroupDao;
 import com.chihu.server.serializer.ApiServerSerializer;
@@ -18,11 +17,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.IOException;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.Optional;
 
 @Slf4j
@@ -60,7 +56,7 @@ public class BusinessController {
         Long userId = userDetails.getUserId();
         businessGroup.setOwnerId(userId);
 
-        businessGroupDao.insertOrUpdateBusinessGroup(businessGroup);
+        businessGroupDao.createBusinessGroup(businessGroup);
         return "";
     }
 
@@ -83,7 +79,7 @@ public class BusinessController {
         }
         businessGroup.setOwnerId(userId);
 
-        businessGroupDao.insertOrUpdateBusinessGroup(businessGroup);
+        businessGroupDao.updateBusinessGroup(businessGroup);
         return "";
     }
 
@@ -152,7 +148,7 @@ public class BusinessController {
         Long userId = userDetails.getUserId();
         businessEntity.setOwnerId(userId);
 
-        businessEntityDao.insertOrUpdateBusinessEntity(businessEntity);
+        businessEntityDao.createBusinessEntity(businessEntity);
         return "";
     }
 
@@ -174,7 +170,7 @@ public class BusinessController {
         }
         businessEntity.setOwnerId(userId);
 
-        businessEntityDao.insertOrUpdateBusinessEntity(businessEntity);
+        businessEntityDao.updateBusinessEntity(businessEntity);
         return "";
     }
 

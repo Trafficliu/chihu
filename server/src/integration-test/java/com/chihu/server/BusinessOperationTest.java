@@ -168,18 +168,18 @@ public class BusinessOperationTest {
         );
 
         // Delete the test business entity, so it can no longer be found
-//        client.deleteBusinessEntity(businessEntityId);
-//        assertThrows(
-//            RuntimeException.class,
-//            () -> client.getBusinessEntityById(businessEntityId)
-//        );
-//
-//        // Delete the test business group, so it can no longer be found
-//        client.deleteBusinessGroup(businessGroupId);
-//        assertThrows(
-//            RuntimeException.class,
-//            () -> client.getBusinessGroupById(businessGroupId)
-//        );
+        client.deleteBusinessEntity(businessEntityId);
+        assertThrows(
+            RuntimeException.class,
+            () -> client.getBusinessEntityById(businessEntityId)
+        );
+
+        // Delete the test business group, so it can no longer be found
+        client.deleteBusinessGroup(businessGroupId);
+        assertThrows(
+            RuntimeException.class,
+            () -> client.getBusinessGroupById(businessGroupId)
+        );
     }
 
 }
