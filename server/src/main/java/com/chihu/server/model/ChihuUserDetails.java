@@ -58,6 +58,10 @@ public class ChihuUserDetails implements UserDetails {
         return user.isActivated();
     }
 
+    public Long getUserId() {
+        return user.getId();
+    }
+
     public String getEmail() {
         return user.getEmail();
     }

@@ -1,6 +1,9 @@
 package com.chihu.server.client;
 
 import com.chihu.server.common.ApiServerConstants;
+import com.chihu.server.model.BusinessEntity;
+import com.chihu.server.model.BusinessGroup;
+import com.chihu.server.model.Dish;
 import com.chihu.server.model.User;
 import com.chihu.server.serializer.ApiServerSerializer;
 import com.google.common.base.Strings;
@@ -18,6 +21,9 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
@@ -28,7 +34,6 @@ import org.apache.commons.io.IOUtils;
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.text.DateFormat;
 import java.util.List;
 
 @Builder(access = AccessLevel.PRIVATE)
@@ -85,8 +90,8 @@ public class ApiServerClient implements Closeable {
         httpClient.close();
     }
 
+    // User Registration and Authentication
     public void userRegister(User user) throws Exception {
-        log.info("Registering user {} ", user);
         HttpPost post = new HttpPost();
         post.setURI(generateUri("/auth/register").build());
 
@@ -102,7 +107,6 @@ public class ApiServerClient implements Closeable {
     }
 
     public String requestActivationToken(String username) throws Exception {
-        log.info("Requesting activation for user {} ", username);
         HttpGet get = new HttpGet();
         get.setURI(
                 generateUri("/auth/request_activation_token")
@@ -118,7 +122,6 @@ public class ApiServerClient implements Closeable {
     }
 
     public void activateUser(String activationToken) throws Exception {
-        log.info("Trying to activate user via activation token {} ", activationToken);
         HttpPost post = new HttpPost();
         post.setURI(generateUri("/auth/activate").build());
 
@@ -131,7 +134,6 @@ public class ApiServerClient implements Closeable {
     }
 
     public String userSignIn(String username, String password) throws Exception {
-        log.info("Authenticate user {}", username);
         HttpPost post = new HttpPost();
         post.setURI(generateUri("/auth/sign_in").build());
 
@@ -149,7 +151,6 @@ public class ApiServerClient implements Closeable {
     }
 
     public String requestPasswordResetToken(String username) throws Exception {
-        log.info("Requesting password reset token for user {} ", username);
         HttpGet get = new HttpGet();
         get.setURI(
                 generateUri("/auth/request_pwd_reset_token")
@@ -173,7 +174,8 @@ public class ApiServerClient implements Closeable {
         parameters.add(new BasicNameValuePair("token", token));
         parameters.add(new BasicNameValuePair("username", username));
         parameters.add(new BasicNameValuePair("password", password));
-        parameters.add(new BasicNameValuePair("confirm_password", confirmPassword));
+        parameters.add(
+            new BasicNameValuePair("confirm_password", confirmPassword));
         post.setEntity(new UrlEncodedFormEntity(parameters));
 
         CloseableHttpResponse response = httpClient.execute(post);
@@ -191,6 +193,312 @@ public class ApiServerClient implements Closeable {
                 IOUtils.toString(
                         response.getEntity().getContent(),
                         StandardCharsets.UTF_8.displayName()));
+    }
+
+    // Business Groups
+    public void createBusinessGroup(BusinessGroup businessGroup) throws Exception {
+        HttpPost post = new HttpPost();
+        post.setURI(generateUri("/business/create_business_group").build());
+
+        MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create();
+        entityBuilder.addPart(
+                "business_group_str",
+                new StringBody(
+                        ApiServerSerializer.serialize(businessGroup),
+                        ContentType.APPLICATION_JSON));
+        post.setEntity(entityBuilder.build());
+
+        CloseableHttpResponse response = httpClient.execute(post);
+        handleHttp(post, response);
+    }
+
+    public void updateBusinessGroup(BusinessGroup businessGroup) throws Exception {
+        HttpPost post = new HttpPost();
+        post.setURI(generateUri("/business/update_business_group").build());
+
+        MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create();
+        entityBuilder.addPart(
+            "business_group_str",
+            new StringBody(
+                ApiServerSerializer.serialize(businessGroup),
+                ContentType.APPLICATION_JSON));
+        post.setEntity(entityBuilder.build());
+
+        CloseableHttpResponse response = httpClient.execute(post);
+        handleHttp(post, response);
+    }
+
+    public void deleteBusinessGroup(Long businessGroupId) throws Exception {
+        HttpPost post = new HttpPost();
+        post.setURI(generateUri("/business/delete_business_group").build());
+
+        List<NameValuePair> parameters = Lists.newArrayList();
+        parameters.add(
+            new BasicNameValuePair(
+                "business_group_id", Long.toString(businessGroupId)));
+        post.setEntity(new UrlEncodedFormEntity(parameters));
+
+        CloseableHttpResponse response = httpClient.execute(post);
+        handleHttp(post, response);
+    }
+
+    public BusinessGroup getBusinessGroupById(Long businessGroupId) throws Exception {
+        HttpGet get = new HttpGet();
+        get.setURI(
+            generateUri("/business/get_business_group_by_id")
+                .addParameter(
+                    "business_group_id",
+                    Long.toString(businessGroupId))
+                .build());
+
+        CloseableHttpResponse response = httpClient.execute(get);
+        handleHttp(get, response);
+
+        return ApiServerSerializer.toBusinessGroup(
+                IOUtils.toString(
+                        response.getEntity().getContent(),
+                        StandardCharsets.UTF_8.displayName()));
+    }
+
+    public BusinessGroup getBusinessGroupByName(String businessGroupName) throws Exception {
+        HttpGet get = new HttpGet();
+        get.setURI(
+            generateUri("/business/get_business_group_by_name")
+                .addParameter(
+                    "business_group_name",
+                    businessGroupName)
+                .build());
+
+        CloseableHttpResponse response = httpClient.execute(get);
+        handleHttp(get, response);
+
+        return ApiServerSerializer.toBusinessGroup(
+            IOUtils.toString(
+                response.getEntity().getContent(),
+                StandardCharsets.UTF_8.displayName()));
+    }
+
+    // Business Entities
+    public void createBusinessEntity(BusinessEntity businessEntity) throws Exception {
+        HttpPost post = new HttpPost();
+        post.setURI(generateUri("/business/create_business_entity").build());
+
+        MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create();
+        entityBuilder.addPart(
+            "business_entity_str",
+            new StringBody(
+                ApiServerSerializer.serialize(businessEntity),
+                ContentType.APPLICATION_JSON));
+        post.setEntity(entityBuilder.build());
+
+        CloseableHttpResponse response = httpClient.execute(post);
+        handleHttp(post, response);
+    }
+
+    public void updateBusinessEntity(BusinessEntity businessEntity) throws Exception {
+        HttpPost post = new HttpPost();
+        post.setURI(generateUri("/business/update_business_entity").build());
+
+        MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create();
+        entityBuilder.addPart(
+            "business_entity_str",
+            new StringBody(
+                ApiServerSerializer.serialize(businessEntity),
+                ContentType.APPLICATION_JSON));
+        post.setEntity(entityBuilder.build());
+
+        CloseableHttpResponse response = httpClient.execute(post);
+        handleHttp(post, response);
+    }
+
+    public void deleteBusinessEntity(Long businessEntityId) throws Exception {
+        HttpPost post = new HttpPost();
+        post.setURI(generateUri("/business/delete_business_entity").build());
+
+        List<NameValuePair> parameters = Lists.newArrayList();
+        parameters.add(
+            new BasicNameValuePair(
+                "business_entity_id", Long.toString(businessEntityId)));
+        post.setEntity(new UrlEncodedFormEntity(parameters));
+
+        CloseableHttpResponse response = httpClient.execute(post);
+        handleHttp(post, response);
+    }
+
+    public BusinessEntity getBusinessEntityById(Long businessEntityId) throws Exception {
+        HttpGet get = new HttpGet();
+        get.setURI(
+            generateUri("/business/get_business_entity_by_id")
+                .addParameter(
+                    "business_entity_id",
+                    Long.toString(businessEntityId))
+                .build());
+
+        CloseableHttpResponse response = httpClient.execute(get);
+        handleHttp(get, response);
+
+        return ApiServerSerializer.toBusinessEntity(
+            IOUtils.toString(
+                response.getEntity().getContent(),
+                StandardCharsets.UTF_8.displayName()));
+    }
+
+    public BusinessEntity getBusinessEntityByName(String businessEntityName) throws Exception {
+        HttpGet get = new HttpGet();
+        get.setURI(
+            generateUri("/business/get_business_entity_by_name")
+                .addParameter(
+                    "business_entity_name",
+                    businessEntityName)
+                .build());
+
+        CloseableHttpResponse response = httpClient.execute(get);
+        handleHttp(get, response);
+
+        return ApiServerSerializer.toBusinessEntity(
+            IOUtils.toString(
+                response.getEntity().getContent(),
+                StandardCharsets.UTF_8.displayName()));
+    }
+
+    public void setWorkingDate(Long businessEntityId, String workingDateStr)
+        throws Exception {
+        HttpPost post = new HttpPost();
+        post.setURI(generateUri("/business/set_working_date").build());
+
+        List<NameValuePair> parameters = Lists.newArrayList();
+        parameters.add(
+            new BasicNameValuePair(
+                "business_entity_id", Long.toString(businessEntityId)));
+        parameters.add(
+            new BasicNameValuePair("working_date_str", workingDateStr));
+        post.setEntity(new UrlEncodedFormEntity(parameters));
+
+        CloseableHttpResponse response = httpClient.execute(post);
+        handleHttp(post, response);
+    }
+
+    public void setWorkingDays(Long businessEntityId, Integer workingDays)
+        throws Exception {
+        HttpPost post = new HttpPost();
+        post.setURI(generateUri("/business/set_working_days").build());
+
+        List<NameValuePair> parameters = Lists.newArrayList();
+        parameters.add(
+            new BasicNameValuePair(
+                "business_entity_id", Long.toString(businessEntityId)));
+        parameters.add(
+            new BasicNameValuePair(
+                "working_days", Integer.toString(workingDays)));
+        post.setEntity(new UrlEncodedFormEntity(parameters));
+
+        CloseableHttpResponse response = httpClient.execute(post);
+        handleHttp(post, response);
+    }
+
+    public void setWorkingHours(Long businessEntityId, Long workingHours)
+        throws Exception {
+        HttpPost post = new HttpPost();
+        post.setURI(generateUri("/business/set_working_hours").build());
+
+        List<NameValuePair> parameters = Lists.newArrayList();
+        parameters.add(
+            new BasicNameValuePair(
+                "business_entity_id", Long.toString(businessEntityId)));
+        parameters.add(
+            new BasicNameValuePair(
+                "working_hours", Long.toString(workingHours)));
+        post.setEntity(new UrlEncodedFormEntity(parameters));
+
+        CloseableHttpResponse response = httpClient.execute(post);
+        handleHttp(post, response);
+    }
+
+    // Dishes
+    public void createDish(Dish dish) throws Exception {
+        HttpPost post = new HttpPost();
+        post.setURI(generateUri("/dish/create_dish").build());
+
+        MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create();
+        entityBuilder.addPart(
+            "dish_str",
+            new StringBody(
+                ApiServerSerializer.serialize(dish),
+                ContentType.APPLICATION_JSON));
+        post.setEntity(entityBuilder.build());
+
+        CloseableHttpResponse response = httpClient.execute(post);
+        handleHttp(post, response);
+    }
+
+    public void updateDish(Dish dish) throws Exception {
+        HttpPost post = new HttpPost();
+        post.setURI(generateUri("/dish/update_dish").build());
+
+        MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create();
+        entityBuilder.addPart(
+            "dish_str",
+            new StringBody(
+                ApiServerSerializer.serialize(dish),
+                ContentType.APPLICATION_JSON));
+        post.setEntity(entityBuilder.build());
+
+        CloseableHttpResponse response = httpClient.execute(post);
+        handleHttp(post, response);
+    }
+
+    public void deleteDish(Long dishId) throws Exception {
+        HttpPost post = new HttpPost();
+        post.setURI(generateUri("/dish/delete_dish").build());
+
+        List<NameValuePair> parameters = Lists.newArrayList();
+        parameters.add(
+            new BasicNameValuePair(
+                "dish_id", Long.toString(dishId)));
+        post.setEntity(new UrlEncodedFormEntity(parameters));
+
+        CloseableHttpResponse response = httpClient.execute(post);
+        handleHttp(post, response);
+    }
+
+    public Dish getDishById(Long dishId) throws Exception {
+        HttpGet get = new HttpGet();
+        get.setURI(
+            generateUri("/dish/get_dish_by_id")
+                .addParameter(
+                    "dish_id",
+                    Long.toString(dishId))
+                .build());
+
+        CloseableHttpResponse response = httpClient.execute(get);
+        handleHttp(get, response);
+
+        return ApiServerSerializer.toDish(
+            IOUtils.toString(
+                response.getEntity().getContent(),
+                StandardCharsets.UTF_8.displayName()));
+    }
+
+    public Dish getDishByName(Long businessGroupId, String dishName)
+        throws Exception {
+        HttpGet get = new HttpGet();
+        get.setURI(
+            generateUri("/dish/get_dish_by_name")
+                .addParameter(
+                    "business_group_id",
+                    Long.toString(businessGroupId))
+                .addParameter(
+                    "dish_name",
+                    dishName)
+                .build());
+
+        CloseableHttpResponse response = httpClient.execute(get);
+        handleHttp(get, response);
+
+        return ApiServerSerializer.toDish(
+            IOUtils.toString(
+                response.getEntity().getContent(),
+                StandardCharsets.UTF_8.displayName()));
     }
 
     // Helper methods

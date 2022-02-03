@@ -1,6 +1,9 @@
 package com.chihu.server.serializer;
 
 import com.chihu.lib.serialize.Serializer;
+import com.chihu.server.model.BusinessEntity;
+import com.chihu.server.model.BusinessGroup;
+import com.chihu.server.model.Dish;
 import com.chihu.server.model.User;
 import com.google.gson.Gson;
 
@@ -11,6 +14,22 @@ public class ApiServerSerializer {
 
     public static User toUser(String userStr) {
         return GSON.fromJson(userStr, User.class);
+    }
+
+    public static BusinessGroup toBusinessGroup(String businessGroupStr) {
+        return GSON.fromJson(businessGroupStr, BusinessGroup.class);
+    }
+
+    public static BusinessEntity toBusinessEntity(String businessEntityStr) {
+        return GSON.fromJson(businessEntityStr, BusinessEntity.class);
+    }
+
+    public static Dish toDish(String dishStr) {
+        return GSON.fromJson(dishStr, Dish.class);
+    }
+
+    public static String serialize(Object object) {
+        return GSON.toJson(object);
     }
 
     public static String prettyPrint(Object object) {

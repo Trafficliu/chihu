@@ -47,13 +47,15 @@ public class ApiServerAuthenticationFilter extends OncePerRequestFilter {
                 && SecurityContextHolder.getContext().getAuthentication() == null
             ) {
                 String username = jwtTokenUtil.extractUsername(jwt);
-                ChihuUserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                ChihuUserDetails userDetails =
+                    userDetailsService.loadUserByUsername(username);
                 UsernamePasswordAuthenticationToken authenticationToken =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails, null, userDetails.getAuthorities());
+                    new UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.getAuthorities());
                 authenticationToken.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                    new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(
+                    authenticationToken);
             }
         } catch (Exception e) {
             log.error("Could not set user authentication. ", e);
