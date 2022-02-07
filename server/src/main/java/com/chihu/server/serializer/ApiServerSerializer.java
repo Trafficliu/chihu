@@ -1,10 +1,7 @@
 package com.chihu.server.serializer;
 
 import com.chihu.lib.serialize.Serializer;
-import com.chihu.server.model.BusinessEntity;
-import com.chihu.server.model.BusinessGroup;
-import com.chihu.server.model.Dish;
-import com.chihu.server.model.User;
+import com.chihu.server.model.*;
 import com.google.gson.Gson;
 
 public class ApiServerSerializer {
@@ -28,11 +25,19 @@ public class ApiServerSerializer {
         return GSON.fromJson(dishStr, Dish.class);
     }
 
+    public static Address toAddress(String addressStr) {
+        return GSON.fromJson(addressStr, Address.class);
+    }
+
     public static String serialize(Object object) {
         return GSON.toJson(object);
     }
 
     public static String prettyPrint(Object object) {
         return GSON_PRETTY_PRINT.toJson(object);
+    }
+
+    public static Gson getGsonInstance() {
+        return GSON;
     }
 }

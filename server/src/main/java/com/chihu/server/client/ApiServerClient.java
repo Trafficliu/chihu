@@ -1,15 +1,13 @@
 package com.chihu.server.client;
 
 import com.chihu.server.common.ApiServerConstants;
-import com.chihu.server.model.BusinessEntity;
-import com.chihu.server.model.BusinessGroup;
-import com.chihu.server.model.Dish;
-import com.chihu.server.model.User;
+import com.chihu.server.model.*;
 import com.chihu.server.serializer.ApiServerSerializer;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.net.HttpHeaders;
+import com.google.gson.reflect.TypeToken;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +31,9 @@ import org.apache.commons.io.IOUtils;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 
 @Builder(access = AccessLevel.PRIVATE)
@@ -41,6 +41,9 @@ import java.util.List;
 public class ApiServerClient implements Closeable {
 
     private static final int DEFAULT_HTTP_PORT = 8894;
+
+    private static final Type ADDRESS_LIST_TYPE =
+        new TypeToken<ArrayList<Address>>() {}.getType();
 
     private final CloseableHttpClient httpClient;
 
@@ -499,6 +502,88 @@ public class ApiServerClient implements Closeable {
             IOUtils.toString(
                 response.getEntity().getContent(),
                 StandardCharsets.UTF_8.displayName()));
+    }
+
+    // Addresses
+    public void createAddress(Address address) throws Exception {
+        HttpPost post = new HttpPost();
+        post.setURI(generateUri("/address/create_address").build());
+
+        MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create();
+        entityBuilder.addPart(
+            "address_str",
+            new StringBody(
+                ApiServerSerializer.serialize(address),
+                ContentType.APPLICATION_JSON));
+        post.setEntity(entityBuilder.build());
+
+        CloseableHttpResponse response = httpClient.execute(post);
+        handleHttp(post, response);
+    }
+
+    public void updateAddress(Address address) throws Exception {
+        HttpPost post = new HttpPost();
+        post.setURI(generateUri("/address/update_address").build());
+
+        MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create();
+        entityBuilder.addPart(
+            "address_str",
+            new StringBody(
+                ApiServerSerializer.serialize(address),
+                ContentType.APPLICATION_JSON));
+        post.setEntity(entityBuilder.build());
+
+        CloseableHttpResponse response = httpClient.execute(post);
+        handleHttp(post, response);
+    }
+
+    public void deleteAddress(Long addressId) throws Exception {
+        HttpPost post = new HttpPost();
+        post.setURI(generateUri("/address/delete_address").build());
+
+        List<NameValuePair> parameters = Lists.newArrayList();
+        parameters.add(
+            new BasicNameValuePair(
+                "address_id", Long.toString(addressId)));
+        post.setEntity(new UrlEncodedFormEntity(parameters));
+
+        CloseableHttpResponse response = httpClient.execute(post);
+        handleHttp(post, response);
+    }
+
+    public Address getAddressById(Long addressId) throws Exception {
+        HttpGet get = new HttpGet();
+        get.setURI(
+            generateUri("/address/get_address_by_id")
+                .addParameter(
+                    "address_id",
+                    Long.toString(addressId))
+                .build());
+
+        CloseableHttpResponse response = httpClient.execute(get);
+        handleHttp(get, response);
+
+        return ApiServerSerializer.toAddress(
+            IOUtils.toString(
+                response.getEntity().getContent(),
+                StandardCharsets.UTF_8.displayName()));
+    }
+
+    public List<Address> getUserAddresses() throws Exception {
+        HttpGet get = new HttpGet();
+        get.setURI(
+            generateUri("/address/get_user_addresses")
+                .build());
+
+        CloseableHttpResponse response = httpClient.execute(get);
+        handleHttp(get, response);
+
+        return ApiServerSerializer.getGsonInstance()
+            .fromJson(
+                IOUtils.toString(
+                    response.getEntity().getContent(),
+                    StandardCharsets.UTF_8.displayName()),
+            ADDRESS_LIST_TYPE);
     }
 
     // Helper methods

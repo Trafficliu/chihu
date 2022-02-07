@@ -153,3 +153,26 @@ UNIQUE(`dish_id`),
 UNIQUE(`business_group_id`, `dish_name`),
 INDEX(`dish_name`)
 );
+
+DROP TABLE IF EXISTS `addresses`;
+CREATE TABLE `addresses` (
+`address_id` BIGINT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+`user_id` BIGINT(11) UNSIGNED NOT NULL,
+`contact_name` VARCHAR(255) NOT NULL,
+`phone_number` VARCHAR(20) NOT NULL,
+`address_line1` VARCHAR(100) NOT NULL,
+`address_line2` VARCHAR(20) DEFAULT NULL,
+`city` VARCHAR(50) NOT NULL,
+`state` VARCHAR(50) NOT NULL,
+`country` VARCHAR(10) NOT NULL DEFAULT 'US',
+`zip_code` VARCHAR(20) NOT NULL,
+`geo_code` BIGINT(20) UNSIGNED,
+PRIMARY KEY(`address_id`),
+UNIQUE(`address_id`),
+UNIQUE(`user_id`, `contact_name`,`phone_number`, `address_line1`, `address_line2`, `city`, `state`, `country`, `zip_code`),
+UNIQUE(`user_id`, `contact_name`, `phone_number`, `geo_code`),
+INDEX(`user_id`),
+INDEX(`address_id`),
+INDEX(`geo_code`),
+INDEX(`zip_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

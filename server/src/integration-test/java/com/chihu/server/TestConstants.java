@@ -1,9 +1,6 @@
 package com.chihu.server;
 
-import com.chihu.server.model.BusinessEntity;
-import com.chihu.server.model.BusinessGroup;
-import com.chihu.server.model.Dish;
-import com.chihu.server.model.User;
+import com.chihu.server.model.*;
 
 import java.util.UUID;
 
@@ -54,5 +51,17 @@ public class TestConstants {
             .priceInCent(1500)
             .cuisineIndex("C01010101")
             .cuisineName("Sichuan")
+            .build();
+
+    public static final Address BASIC_TEST_ADDRESS =
+        Address.builder()
+            .contactName("TestDishName-" + UUID.randomUUID().toString().substring(0, 7))
+            .phoneNumber(UUID.randomUUID().toString().substring(0, 13))
+            .addressLine1("888 S Vermont Ave")
+            .addressLine2("#18")
+            .city("Los Angeles")
+            .state("CA")
+            .country("US")
+            .zipCode("90005")
             .build();
 }
