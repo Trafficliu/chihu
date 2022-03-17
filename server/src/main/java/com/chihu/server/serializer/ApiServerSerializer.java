@@ -29,6 +29,10 @@ public class ApiServerSerializer {
         return GSON.fromJson(addressStr, Address.class);
     }
 
+    public static OrderSummary toOrderSummary(String orderSummary) {
+        return GSON.fromJson(orderSummary, OrderSummary.class);
+    }
+
     public static String serialize(Object object) {
         return GSON.toJson(object);
     }

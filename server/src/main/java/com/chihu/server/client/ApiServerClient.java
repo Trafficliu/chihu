@@ -35,6 +35,7 @@ import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Builder(access = AccessLevel.PRIVATE)
 @Slf4j
@@ -44,6 +45,15 @@ public class ApiServerClient implements Closeable {
 
     private static final Type ADDRESS_LIST_TYPE =
         new TypeToken<ArrayList<Address>>() {}.getType();
+
+    private static final Type DISH_COUNT_MAP_TYPE =
+        new TypeToken<Map<Long, Integer>>() {}.getType();
+
+    private static final Type ORDER_DETAIL_LIST_TYPE =
+        new TypeToken<List<OrderDetail>>() {}.getType();
+
+    private static final Type ORDER_SUMMARY_LIST_TYPE =
+        new TypeToken<List<OrderSummary>>() {}.getType();
 
     private final CloseableHttpClient httpClient;
 
@@ -584,6 +594,154 @@ public class ApiServerClient implements Closeable {
                     response.getEntity().getContent(),
                     StandardCharsets.UTF_8.displayName()),
             ADDRESS_LIST_TYPE);
+    }
+
+    // Orders
+    public void updateCart(Map<Long, Integer> dishCount, Long businessEntityId)
+        throws Exception {
+        HttpPost post = new HttpPost();
+        post.setURI(generateUri("/order/update_cart")
+            .addParameter(
+                "dish_count_str", ApiServerSerializer.serialize(dishCount))
+            .addParameter(
+                "business_entity_id", Long.toString(businessEntityId))
+            .build());
+
+        CloseableHttpResponse response = httpClient.execute(post);
+        handleHttp(post, response);
+    }
+
+    public void createOrder(Map<Long, Integer> dishCount,
+                            Long businessEntityId,
+                            Long toAddressId,
+                            String deliveryType,
+                            Integer tipInCent) throws Exception {
+        HttpPost post = new HttpPost();
+        post.setURI(generateUri("/order/create_order")
+            .addParameter(
+                "dish_count_str", ApiServerSerializer.serialize(dishCount))
+            .addParameter(
+                "business_entity_id", Long.toString(businessEntityId))
+            .addParameter(
+                "to_address_id", Long.toString(toAddressId))
+            .addParameter(
+                "delivery_type", deliveryType)
+            .addParameter(
+                "tip_in_cent", Integer.toString(tipInCent))
+            .build());
+
+        CloseableHttpResponse response = httpClient.execute(post);
+        handleHttp(post, response);
+    }
+
+    public void updateOrder(Long orderId,
+                            Map<Long, Integer> dishCount,
+                            Long businessEntityId) throws Exception {
+        HttpPost post = new HttpPost();
+        post.setURI(generateUri("/order/update_order")
+            .addParameter(
+                "order_id", Long.toString(orderId))
+            .addParameter(
+                "dish_count_str", ApiServerSerializer.serialize(dishCount))
+            .addParameter(
+                "business_entity_id", Long.toString(businessEntityId))
+            .build());
+
+        CloseableHttpResponse response = httpClient.execute(post);
+        handleHttp(post, response);
+    }
+
+    public void eaterUpdateOrderStatus(Long orderId,
+                                       String status) throws Exception {
+        HttpPost post = new HttpPost();
+        post.setURI(generateUri("/order/eater_update_order_status")
+            .addParameter(
+                "order_id", Long.toString(orderId))
+            .addParameter(
+                "status", status)
+            .build());
+
+        CloseableHttpResponse response = httpClient.execute(post);
+        handleHttp(post, response);
+    }
+
+    public void ownerUpdateOrderStatus(Long orderId,
+                                       String status) throws Exception {
+        HttpPost post = new HttpPost();
+        post.setURI(generateUri("/order/owner_update_order_status")
+            .addParameter(
+                "order_id", Long.toString(orderId))
+            .addParameter(
+                "status", status)
+            .build());
+
+        CloseableHttpResponse response = httpClient.execute(post);
+        handleHttp(post, response);
+    }
+
+    public List<OrderDetail> getDishesInCart() throws Exception {
+        HttpGet get = new HttpGet();
+        get.setURI(generateUri("/order/get_dishes_in_cart").build());
+
+        CloseableHttpResponse response = httpClient.execute(get);
+        handleHttp(get, response);
+
+        return ApiServerSerializer.getGsonInstance()
+            .fromJson(
+                IOUtils.toString(
+                    response.getEntity().getContent(),
+                    StandardCharsets.UTF_8.displayName()),
+                ORDER_DETAIL_LIST_TYPE);
+    }
+
+    public List<OrderDetail> getOrderDishes(Long orderId) throws Exception {
+        HttpGet get = new HttpGet();
+        get.setURI(
+            generateUri("/order/get_order_dishes")
+                .addParameter("order_id", Long.toString(orderId))
+                .build());
+
+        CloseableHttpResponse response = httpClient.execute(get);
+        handleHttp(get, response);
+
+        return ApiServerSerializer.getGsonInstance()
+            .fromJson(
+                IOUtils.toString(
+                    response.getEntity().getContent(),
+                    StandardCharsets.UTF_8.displayName()),
+                ORDER_DETAIL_LIST_TYPE);
+    }
+
+    public OrderSummary getOrderSummary(Long orderId) throws Exception {
+        HttpGet get = new HttpGet();
+        get.setURI(
+            generateUri("/order/get_order_summary")
+                .addParameter("order_id", Long.toString(orderId))
+                .build());
+
+        CloseableHttpResponse response = httpClient.execute(get);
+        handleHttp(get, response);
+
+        return ApiServerSerializer.toOrderSummary(
+            IOUtils.toString(
+                response.getEntity().getContent(),
+                StandardCharsets.UTF_8.displayName()));
+    }
+
+    public List<OrderSummary> getAllOrderSummaries() throws Exception {
+        HttpGet get = new HttpGet();
+        get.setURI(
+            generateUri("/order/get_all_order_summaries").build());
+
+        CloseableHttpResponse response = httpClient.execute(get);
+        handleHttp(get, response);
+
+        return ApiServerSerializer.getGsonInstance()
+            .fromJson(
+                IOUtils.toString(
+                    response.getEntity().getContent(),
+                    StandardCharsets.UTF_8.displayName()),
+                ORDER_SUMMARY_LIST_TYPE);
     }
 
     // Helper methods
