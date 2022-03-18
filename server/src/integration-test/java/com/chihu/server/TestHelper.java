@@ -30,4 +30,12 @@ public class TestHelper {
         return client;
     }
 
+    public static String generateRandomNameWithPrefix(String prefix) {
+        StringBuilder name = new StringBuilder();
+        name.append(prefix)
+            .append("-")
+            .append(UUID.randomUUID().toString().substring(0, 8));
+
+        return name.toString();
+    }
 }

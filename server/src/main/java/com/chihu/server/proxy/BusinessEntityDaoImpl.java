@@ -1,5 +1,6 @@
 package com.chihu.server.proxy;
 
+import com.chihu.server.model.Address;
 import com.chihu.server.model.BusinessEntity;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -159,6 +160,21 @@ public class BusinessEntityDaoImpl implements BusinessEntityDao {
             return Optional.empty();
         }
         return Optional.of(result.iterator().next());
+    }
+
+    @Override
+    public Address getBusinessAddress(@NonNull BusinessEntity businessEntity) {
+        Address address =
+            Address.builder()
+                .addressLine1(businessEntity.getAddressLine1())
+                .addressLine2(businessEntity.getAddressLine2())
+                .city(businessEntity.getCity())
+                .state(businessEntity.getState())
+                .country(businessEntity.getCountry())
+                .zipCode(businessEntity.getZipCode())
+                .geoCode(businessEntity.getGeoCode())
+                .build();
+        return address;
     }
 
     // TODO: Business Entity should either have a Working Date,

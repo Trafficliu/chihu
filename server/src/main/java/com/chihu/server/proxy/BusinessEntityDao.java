@@ -1,5 +1,6 @@
 package com.chihu.server.proxy;
 
+import com.chihu.server.model.Address;
 import com.chihu.server.model.BusinessEntity;
 import lombok.NonNull;
 
@@ -13,6 +14,8 @@ public interface BusinessEntityDao {
 
     Optional<BusinessEntity> getBusinessEntityById(@NonNull Long businessEntityId);
     Optional<BusinessEntity> getBusinessEntityByName(@NonNull String name);
+
+    Address getBusinessAddress(@NonNull BusinessEntity businessEntity);
 
     void setWorkingDate(@NonNull Long businessEntityId, @NonNull LocalDate date);
     void setWorkingDays(@NonNull Long businessEntityId, @NonNull Integer workingDaysBits);

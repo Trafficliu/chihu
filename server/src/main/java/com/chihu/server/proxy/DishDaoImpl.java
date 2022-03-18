@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -31,14 +33,15 @@ public class DishDaoImpl implements DishDao {
             "       cuisine_name = :cuisine_name, " +
             "       external_image_id = :external_image_id, " +
             "       dish_image_path = :dish_image_path, " +
-            "       special_flags = :special_flags " +
-            " ON DUPLICATE KEY UPDATE " +
-            "       price_in_cent = :price_in_cent, " +
-            "       cuisine_index = :cuisine_index, " +
-            "       cuisine_name = :cuisine_name, " +
-            "       external_image_id = :external_image_id, " +
-            "       dish_image_path = :dish_image_path, " +
             "       special_flags = :special_flags "
+//                +
+//            " ON DUPLICATE KEY UPDATE " +
+//            "       price_in_cent = :price_in_cent, " +
+//            "       cuisine_index = :cuisine_index, " +
+//            "       cuisine_name = :cuisine_name, " +
+//            "       external_image_id = :external_image_id, " +
+//            "       dish_image_path = :dish_image_path, " +
+//            "       special_flags = :special_flags "
             ;
         SqlParameterSource parameterSource = new MapSqlParameterSource()
             .addValue("business_group_id", dish.getBusinessGroupId())
@@ -134,5 +137,72 @@ public class DishDaoImpl implements DishDao {
             return Optional.empty();
         }
         return Optional.of(result.iterator().next());
+    }
+
+    @Override
+    public List<Dish> getDishesOfList(@NonNull List<Long> dishIds) {
+        String sql =
+            "SELECT * " +
+            "  FROM dishes " +
+            " WHERE dish_id IN (:dish_id) "
+            ;
+        SqlParameterSource parameterSource = new MapSqlParameterSource()
+            .addValue(
+                "dish_id",
+                String.join(
+                    ",",
+                    dishIds
+                        .stream()
+                        .map(dishId -> (dishId.toString()))
+                        .collect(Collectors.toList())));
+
+        List<Dish> result =
+            namedParameterJdbcTemplate.query(
+                sql,
+                parameterSource,
+                new BeanPropertyRowMapper<>(Dish.class));
+        return result;
+    }
+
+    @Override
+    public List<Dish> getDishesOfSet(@NonNull Set<Long> dishIds) {
+        String sql =
+            "SELECT * " +
+            "  FROM dishes " +
+            " WHERE dish_id IN (:dish_id) "
+            ;
+
+        String dish_ids =
+            String.join(
+                ",",
+                dishIds
+                    .stream()
+                    .map(dishId -> (dishId.toString()))
+                    .collect(Collectors.toList()));
+//        SqlParameterSource parameterSource = new MapSqlParameterSource()
+//            .addValue(
+//                "dish_id",
+//                String.join(
+//                    ",",
+//                    dishIds
+//                        .stream()
+//                        .map(dishId -> (dishId.toString()))
+//                        .collect(Collectors.toList())));
+
+        SqlParameterSource parameterSource = new MapSqlParameterSource()
+            .addValue(
+                "dish_id",
+                    dishIds);
+        log.info("The dish ids: {}", dish_ids);
+        log.info(parameterSource.toString());
+
+        List<Dish> result =
+            namedParameterJdbcTemplate.query(
+                sql,
+                parameterSource,
+                new BeanPropertyRowMapper<>(Dish.class));
+        log.info("result size is: {}", result.size());
+
+        return result;
     }
 }
